@@ -349,7 +349,8 @@ class RingChart {
                 .range([0, 100 - (100 / this._chartData.length)]);
 
         this._drawCircle(id, radius.max);
-        const ticks = scale.ticks();
+        let ticks = scale.ticks();
+        if (ticks.length > this._chartData.length) ticks = scale.ticks(this._chartData.length);
         this._g.selectAll(".tick")
             .data(ticks)
             .join("g")
@@ -370,16 +371,18 @@ class RingChart {
                 .attr("xlink:href", "#" + id)
                 .attr("startOffset", d => scale(d) + "%")
                 .text((d, i) => {
-                    const s = this._chartData[d].tick;
-                    if (this._tick.isDate) {
-                        const date = this._tick.format !== "" ? d3.timeParse(s) : new Date(s);
-                        return date.toLocaleDateString();
+                    if (Number.isInteger(d)) {
+                      const s = this._chartData[d].tick;
+                      if (this._tick.isDate) {
+                          const date = this._tick.format !== "" ? d3.timeParse(s) : new Date(s);
+                          return date.toLocaleDateString();
+                      }
+                      else
+                          return s;
                     }
-                    else
-                        return s;
                 }));
     }
-
+    
     _drawCircle(id, radius) {
         this._g.append("path")
             .attr("id", id)
